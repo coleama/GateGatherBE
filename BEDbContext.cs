@@ -32,7 +32,7 @@ namespace BECapstone
                 modelBuilder.Entity<TimeSlots>().HasData(new TimeSlots { Id = i, Value = $"{i}:00 AM" });
                 modelBuilder.Entity<TimeSlots>().HasData(new TimeSlots { Id = i + 12, Value = $"{i}:00 PM" });
             }
-            modelBuilder.Entity<Events>().HasData(new Events { Id = 1, Name = "Cole's Event", EndTimeId = 13, StartTimeId = 2, PlayTypeId = 1, uid = "" });
+            modelBuilder.Entity<Events>().HasData(new Events { Id = 1, Name = "Cole's Event", EndTimeId = 13, StartTimeId = 2, PlayTypeId = 1, uid = "", Date = "10/23/2023"});
             modelBuilder.Entity<Class>().HasData(new Class[]
             {
                 new Class { Id = 1, Name = "Fighter", Description = "A master of martial combat, skilled with a variety of weapons and armor", image = "https://i.pinimg.com/originals/2c/8a/39/2c8a3940f4d506f7a7198a8035ae84c5.png"},

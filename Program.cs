@@ -15,7 +15,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins("http://localhost:3000",
-                                "http://localhost:7195") // Change to match your SWAGGER Url *****
+                                "http://localhost:7149") // Change to match your SWAGGER Url *****
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
         });
@@ -57,15 +57,15 @@ app.UseHttpsRedirection();
 //  check user
 app.MapGet("/checkuser/{uid}", (BEDbContext db, string uid) =>
 {
-    var user = db.Users.Where(x => x.uid == uid).ToList();
-    if (uid == null)
+    var user = db.Users.Where(x => x.uid == uid)
+    .Include(u => u.Class)
+    .Include(u => u.Events)
+    .FirstOrDefault();
+    if (user == null)
     {
         return Results.NotFound();
     }
-    else
-    {
         return Results.Ok(user);
-    }
 });
 // get all users
 app.MapGet("/users", (BEDbContext db) =>
@@ -75,8 +75,15 @@ app.MapGet("/users", (BEDbContext db) =>
 // get user by Id
 app.MapGet("/users/{id}", (BEDbContext db, int id) =>
 {
-    var user = db.Users.Where(u => u.Id == id);
-    return user;
+    var user = db.Users.Where(u => u.Id == id)
+    .Include(u => u.Class)
+    .Include(u => u.Events)
+    .FirstOrDefault(); ;
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(user);
 });
 //create User 
 app.MapPost("/users", (BEDbContext db, User User) =>
@@ -127,7 +134,7 @@ app.MapGet("/userEvents/{uid}", async (BEDbContext db, string uid) =>
 // add a Class to a User 
 app.MapPost("/classUser/{classId}/{userId}", (int classId, int userId, BEDbContext db) =>
 {
-    var classToAdd = db.Class.Include(c => c.Users).FirstOrDefault(u => u.Id == userId);
+    var classToAdd = db.Class.Include(c => c.Users).FirstOrDefault(c => c.Id == classId);
 
     if (classToAdd == null)
     {
@@ -194,7 +201,7 @@ app.MapGet("/createdEventUser/{uid}", (BEDbContext db, string uid) =>
 // add a user to a event 
 app.MapPost("/eventUser/{userId}/{eventId}", (int userId, int eventId, BEDbContext db) =>
 {
-    var user = db.Users.Include(u => u.Events).FirstOrDefault(e => e.Id == eventId);
+    var user = db.Users.Include(u => u.Events).FirstOrDefault(u => u.Id == userId);
 
     if (user == null)
     {
@@ -216,7 +223,7 @@ app.MapPost("/eventUser/{userId}/{eventId}", (int userId, int eventId, BEDbConte
 // add a Class to a event 
 app.MapPost("/eventClass/{classId}/{eventId}", (int classId, int eventId, BEDbContext db) =>
 {
-    var classToAdd = db.Class.Include(c => c.Events).FirstOrDefault(e => e.Id == eventId);
+    var classToAdd = db.Class.Include(c => c.Events).FirstOrDefault(c => c.Id == classId);
 
     if (classToAdd == null)
     {
@@ -274,6 +281,8 @@ app.MapGet("/events", async (BEDbContext db) =>
 app.MapGet("/events/{id}", (BEDbContext db, int id) =>
 {
     var events = db.Events.Where(e => e.Id == id)
+    .Include(e => e.Users)
+    .ThenInclude(u => u.Class)
     .Include(e => e.Class)
     .Include(e => e.StartTime)
     .Include(e => e.EndTime)
@@ -352,5 +361,10 @@ app.MapGet("/playType", (BEDbContext db) =>
 app.MapGet("/timeSlots", (BEDbContext db) =>
 {
     return db.TimeSlots.ToList();
+});
+// get all classes 
+app.MapGet("/class", (BEDbContext db) =>
+{
+    return db.Class.ToList();
 });
 app.Run();

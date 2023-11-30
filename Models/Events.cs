@@ -7,6 +7,7 @@ namespace BECapstone.Models
         public int Id { get; set; } 
         public string Name { get; set; }
         public string uid { get; set; }
+        public string Date {  get; set; }
         public ICollection<User> Users { get; set; }
         public ICollection<Class> Class { get; set; }
         [ForeignKey("StartTime")]
